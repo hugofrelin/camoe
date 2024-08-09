@@ -12,21 +12,21 @@ import argparse
 from CAMoE import CAMoE_GNN
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', type=str, default='MUTAG')
-parser.add_argument('--lr', type=float, default=0.005)
-parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--gnn_layer', type=str, default='GCN')
-parser.add_argument('--max_epochs', type=int, default=1000)
-parser.add_argument('--patience', type=int, default=100)
-parser.add_argument('--num_folds', type=int, default=5)
-parser.add_argument('--split_idx', type=int, default=0)
-parser.add_argument('--hidden_dim', type=int, default=32)
-parser.add_argument('--depth', type=int, default=2)
-parser.add_argument('--heads', type=int, default=1)
-parser.add_argument('--GPU', type=bool, default=True)
-parser.add_argument('--forward_on_top_features', type=bool, default=False)
-parser.add_argument('--gate_on_top_only', type=bool, default=True)
-parser.add_argument('--num_experts', type=int, default=3)
+parser.add_argument('--dataset', type = str, default = 'MUTAG')
+parser.add_argument('--lr', type = float, default = 0.005)
+parser.add_argument('--batch_size', type = int, default = 32)
+parser.add_argument('--gnn_layer', type = str, default = 'GCN')
+parser.add_argument('--max_epochs', type = int, default = 1000)
+parser.add_argument('--patience', type = int, default = 100)
+parser.add_argument('--num_folds', type = int, default = 5)
+parser.add_argument('--split_idx', type = int, default = 0)
+parser.add_argument('--hidden_dim', type = int, default = 32)
+parser.add_argument('--depth', type = int, default = 2)
+parser.add_argument('--heads', type = int, default = 1)
+parser.add_argument('--GPU', type = bool, default = True)
+parser.add_argument('--forward_on_top_features', type = bool, default = False)
+parser.add_argument('--gate_on_top_only', type = bool, default = True)
+parser.add_argument('--num_experts', type = int, default = 3)
 
 args = parser.parse_args()
 
@@ -53,22 +53,26 @@ if __name__ == "__main__":
     if torch.cuda.is_available() and GPU:
         device = "cuda:0"
 
+    print('====================')
     print(f'Device: {device}')
+    print('====================\n')    
     
     if DATA_SET_NAME == 'MUTAG' or DATA_SET_NAME == 'PROTEINS': 
         dataset = TUDatasetWithTopFeatures(
-            root='data',
-            name=DATA_SET_NAME,
+            root = 'data',
+            name = DATA_SET_NAME,
             )
     
     elif DATA_SET_NAME == 'EXP' or DATA_SET_NAME == 'CEXP':
         dataset = PlanarSATPairsDatasetWithTopFeatures(
-            root="expData/" + DATA_SET_NAME)
+            root = "expData/" + DATA_SET_NAME)
         
     else:
         raise Exception("Unsupported Dataset")
 
+    print('====================')
     print(f'Dataset: {DATA_SET_NAME}')
+    print('====================\n')
 
     train_indices, val_indices, test_indices = get_stratified_split(
         labels = dataset.y,
@@ -76,24 +80,28 @@ if __name__ == "__main__":
         k = NUM_FOLDS
         )
     
-    train_loader = DataLoader(dataset[train_indices], batch_size=BATCH_SIZE, shuffle=True)
-    val_loader = DataLoader(dataset[val_indices], batch_size=BATCH_SIZE, shuffle=True)
-    test_loader = DataLoader(dataset[test_indices], batch_size=BATCH_SIZE, shuffle=True)
+    train_loader = DataLoader(dataset[train_indices], batch_size = BATCH_SIZE, shuffle = True)
+    val_loader = DataLoader(dataset[val_indices], batch_size = BATCH_SIZE, shuffle = True)
+    test_loader = DataLoader(dataset[test_indices], batch_size = BATCH_SIZE, shuffle = True)
     
     model = CAMoE_GNN(
-        node_features=dataset.num_features,
-        hidden_dim=HIDDEN_DIMENSION,
-        gnn_layer=GNN_LAYER,
-        out_channels=dataset.num_classes,
-        depth=DEPTH,
-        heads=HEADS,
+        node_features = dataset.num_features,
+        hidden_dim = HIDDEN_DIMENSION,
+        gnn_layer = GNN_LAYER,
+        out_channels = dataset.num_classes,
+        depth = DEPTH,
+        heads = HEADS,
         forward_on_top_features = FORWARD_ON_TOP_FEATURES,
         gate_top_only = GATE_ON_TOP_ONLY,
         node_classification = False,
         experts = EXPERTS
         ).to(device)
     
-    optimizer = optim.Adam(model.parameters(), lr=LR)
+    print('====================')
+    print(f'Model:\n{model}')
+    print('====================\n')
+
+    optimizer = optim.Adam(model.parameters(), lr = LR)
     loss_fn = nn.CrossEntropyLoss()
 
     model, train_loss_arr, val_loss_arr, best_epoch, best_val_loss = train_model(
@@ -108,15 +116,14 @@ if __name__ == "__main__":
         device = device,
         break_early = True
         )
-    
+        
     accuracy, precision, sensitivity, f1 = test(
         model = model,
         data_loader = test_loader,
-        device=device,
-        verbose=True
+        device = device,
+        verbose = True
         )
     
     del model
     del optimizer
-    torch.cuda.empty_cache()  # Clear CUDA memory
-
+    torch.cuda.empty_cache()

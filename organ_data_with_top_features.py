@@ -1,7 +1,9 @@
 import numpy as np
+import networkx as nx
 import torch
 import sklearn
 from torch_geometric.data import Data
+from torch_geometric.utils import to_networkx
 import os
 
 def get_topological_node_features(data):
@@ -30,24 +32,19 @@ def get_topological_node_features(data):
     
     return topology_tensor
 
-def get_Organ(view = 'C', get_masks = False):
-    print(f"Loading Organ-{view} Dataset...")
-    
+def get_Organ(view = 'C', get_masks = False):    
     if view == 'C':
         dataset_name = 'organc'
     elif view == 'S':
         dataset_name = 'organs'
     
-    # Read Labels
     data_label = np.load('organ_data/'+dataset_name+'/data_label.npy')
 
-    # Read and normalise Features
     data_feat = np.load('organ_data/'+dataset_name+'/data_feat.npy')
     scaler = sklearn.preprocessing.StandardScaler()
     scaler.fit(data_feat)
     data_feat = scaler.transform(data_feat)
 
-    # Read Edges
     edge_index = np.load('organ_data/'+dataset_name+'/edge_index.npy')
 
     data_feat = torch.tensor(data_feat, dtype=torch.float)
@@ -65,24 +62,8 @@ def get_Organ(view = 'C', get_masks = False):
 
     data.top_features = topology_tensor
     
-    if not get_masks:
-        print_statistics(data)
-        return data 
+    return data 
     
-    else:
-        train_mask = np.load('organ_data/'+dataset_name+'/train_mask.npy')
-        train_mask = torch.tensor(train_mask)
-
-        val_mask = np.load('organ_data/'+dataset_name+'/val_mask.npy')
-        val_mask = torch.tensor(val_mask)
-
-        test_mask = np.load('organ_data/'+dataset_name+'/test_mask.npy')
-        test_mask = torch.tensor(test_mask)
-
-        print_statistics(data, train_mask, val_mask, test_mask)
-        
-        return data, train_mask, val_mask, test_mask
-
 def print_statistics(data, train_mask = None, val_mask = None, test_mask = None):
     
     print("=============== Dataset Properties ===============")

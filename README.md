@@ -10,6 +10,12 @@ CAMoE can be applied to any message passing GNN, and this implementation support
 
 **b)** A flowchart showing how the same graph would be processed by the CAMoE-GCN. In addition to $\mathbf{\hat{A}}$ and $\mathbf{H}^{(k)}$, the graph is also described by a node centrality feature matrix $\mathbf{C}$. i) As this is the CAMoE-GCN, it uses the same aggregation method as the standard GCN. ii) The node centrality feature matrix is used to compute weights for each expert layer, with the SoftMax function applied for soft gating. iii) Each node is updated by the experts and then multiplied by the gating weights. iv) The sum of all weighted expert updates results in the new embedding $\mathbf{H}^{(k+1)}$.
 
+# Dependencies
+All the dependencies are listed in requirements.txt and can be installed by running the terminal command:
+```
+pip install -r requirements.txt
+```
+
 # Repository content
 
 ## The Model
@@ -18,30 +24,92 @@ CAMoE.py contains the classes CAMoE_GNN and CAMoE_GNN_Layer, which are the CAMoE
 ## Utils
 utils.py, train_utils_graph_classification.py and train_utils_node_classification.py contain helper functions used to split data, train and evaluate the models.
 
-## Data and data classes
-The directories data, expData and organ_data contains the preprocessed datasets used in benchmarking the CAMoE-GNNs.
+## Data and helper files
+The directories data, expData and organ_data contains the preprocessed datasets used in benchmarking the CAMoE-GNNs. These datasets can be loaded using TUDatasetWithTopFeatures.py, PlanetoidWithTopFeatures.py, PlanarSATPairsDatasetWithTopFeatures.py and organ_data_with_top_features.py. The first three are adjusted implementations of data loading classes originally from: [TUDataset](https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/datasets/tu_dataset.html#TUDataset), [Planetoid](https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/datasets/planetoid.html#Planetoid)and [PlanarSATPairsDataset](https://github.com/ralphabb/GNN-RNI/blob/main/PlanarSATPairsDataset.py). They are altered so they support precomputed Node Centrality Features. The organ data is from [MedMNIST](https://medmnist.com/).
 
-\begin{table}[h]
-  \centering
-  \caption{Overview of graph classification datasets used for performance benchmarking.}
-  \label{tab:dataset_overview_graph_class}
-  \begin{tabular}{|l|cc|cc|} % Adjust the number of columns as needed
-    \hline
-    Domain & \multicolumn{2}{c|}{Chemical} & \multicolumn{2}{c|}{Expressiveness} \\
-    \hline
-    Dataset & MUTAG & PROTEINS & EXP & CEXP \\
-    \hline
-    \# graphs & 188 & 1113 & 1200 & 1200 \\
-    \# classes & 2 & 2 & 2 & 2 \\
-    \# features & 7 & 3 & 2 & 2 \\
-    Avg \# nodes & 17.9 & 39.1 & 55.8 & 44.4 \\
-    \hline
-  \end{tabular}
-\end{table}
+Below is an overview of the graph classification datasets used in benchmarking.
+| Dataset      | MUTAG                  | PROTEINS               | EXP                    | CEXP                   |
+|--------------|------------------------|------------------------|------------------------|------------------------|
+| # graphs     | 188                    | 1113                   | 1200                   | 1200                   |
+| # classes    | 2                      | 2                      | 2                      | 2                      |
+| # features   | 7                      | 3                      | 2                      | 2                      |
+| Avg # nodes  | 17.9                   | 39.1                   | 55.8                   | 44.4                   |
 
-# Dependencies
-All the dependencies are listed in requirements.txt and can be installed by running the terminal command:
+Below is an overview of the node classification datasets used in benchmarking.
+| Dataset      | ORGAN-S                | ORGAN-C                | CiteSeer               | Cora                   | PubMed                 |
+|--------------|------------------------|------------------------|------------------------|------------------------|------------------------|
+| # graphs     | 1                      | 1                      | 1                      | 1                      | 1                      |
+| # classes    | 11                     | 11                     | 6                      | 7                      | 3                      |
+| # features   | 784                    | 784                    | 3703                   | 1433                   | 500                    |
+| Avg # nodes  | 25221                  | 23660                  | 3327                   | 2708                   | 19717                  |
+
+# Running the models
+There are two main files for running the CAMoE-GNN.  ```main_graph_classification.py``` is used for training the model on any of the 4 graph classification datasets, and ```main_node_classification.py``` is run for training the model on any of the 5 node classification datasets.
+
+
+
+## Running the CAMoE GNN for node classification
+
+To run the script from the terminal, navigate to the directory containing the script and use the following command:
+
 ```
-pip install -r requirements.txt
+python main_node_classification.py 
 ```
+
+The script can also parse any of the following arguments
+
+- `--dataset` (str): Name of the dataset to use. Default is `'CiteSeer'`.
+  - Options include: `'CiteSeer'`, `'Cora'`, `'PubMed'`, `'Organ_C'`, `'Organ_S'`.
+
+- `--lr` (float): Learning rate for the optimizer. Default is `0.005`.
+
+- `--batch_size` (int): Batch size for training. Default is `32`.
+
+- `--gnn_layer` (str): Type of GNN layer to use. Default is `'GCN'`.
+
+- `--max_epochs` (int): Maximum number of training epochs. Default is `1000`.
+
+- `--patience` (int): Number of epochs with no improvement after which training will be stopped early. Default is `100`.
+
+- `--num_folds` (int): Number of folds for cross-validation. Default is `5`.
+
+- `--split_idx` (int): Index of the data split to use. Default is `0`.
+
+- `--hidden_dim` (int): Number of hidden dimensions in the GNN. Default is `32`.
+
+- `--depth` (int): Depth of the GNN (number of layers). Default is `3`.
+
+- `--heads` (int): Number of attention heads (relevant for certain GNN layers like GAT). Default is `1`.
+
+- `--GPU` (bool): Whether to use GPU for training. Default is `True`.
+
+- `--forward_on_top_features` (bool): Whether to forward only on top features. Default is `False`.
+
+- `--gate_on_top_only` (bool): Whether to apply gating only on top features. Default is `True`.
+
+- `--num_experts` (int): Number of experts for the model. Default is `3`.
+
+### Example
+
+The example below would train a 4-layer deep CAMoE-GAT on the CiteSeer dataset with a learning rate of 0.01, a hidden dimensionality of 64 and.
+
+```
+python main_node_classification.py --dataset CiteSeer --lr 0.01 --gnn_layer GAT  --hidden_dim 64 --depth 4
+```
+
+## Running the CAMoE GNN for graph classification
+
+Similarily to graph classification, run the following command in the terminal.
+```
+python main_node_classification.py 
+```
+
+The script can also parse the same arguments as above with the addition of:
+
+- `--batch_size` (int): Batch size for training. Default is `32`.
+
+The dataset parser is also slightly different, as it supports graph classification datasets.
+
+- `--dataset` (str): Name of the dataset to use. Default is `'MUTAG'`.
+  - Options include: `'MUTAG'`, `'PROTENS'`, `'EXP'`, `'CEXP'`.
 

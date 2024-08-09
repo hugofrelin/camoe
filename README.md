@@ -19,13 +19,13 @@ pip install -r requirements.txt
 # Repository content
 
 ## The Model
-CAMoE.py contains the classes CAMoE_GNN and CAMoE_GNN_Layer, which are the CAMoE implementation.
+`CAMoE.py` contains the classes `CAMoE_GNN` and `CAMoE_GNN_Layer`, which make up the CAMoE implementation.
 
 ## Utils
-utils.py, train_utils_graph_classification.py and train_utils_node_classification.py contain helper functions used to split data, train and evaluate the models.
+`utils.py`, `train_utils_graph_classification.py` and `train_utils_node_classification.py` contain helper functions used to split data, train and evaluate the models.
 
 ## Data and helper files
-The directories data, expData and organ_data contains the preprocessed datasets used in benchmarking the CAMoE-GNNs. These datasets can be loaded using TUDatasetWithTopFeatures.py, PlanetoidWithTopFeatures.py, PlanarSATPairsDatasetWithTopFeatures.py and organ_data_with_top_features.py. The first three are adjusted implementations of data loading classes originally from: [TUDataset](https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/datasets/tu_dataset.html#TUDataset), [Planetoid](https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/datasets/planetoid.html#Planetoid)and [PlanarSATPairsDataset](https://github.com/ralphabb/GNN-RNI/blob/main/PlanarSATPairsDataset.py). They are altered so they support precomputed Node Centrality Features. The organ data is from [MedMNIST](https://medmnist.com/).
+The directories `data/`, `expData/` and `organ_data/` contains the preprocessed datasets used in benchmarking the CAMoE-GNNs. These datasets can be loaded using `TUDatasetWithTopFeatures.py`, `PlanetoidWithTopFeatures.py`, `PlanarSATPairsDatasetWithTopFeatures.py` and `organ_data_with_top_features.py`. The first three are adjusted implementations of data loading classes originally from: [TUDataset](https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/datasets/tu_dataset.html#TUDataset), [Planetoid](https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/datasets/planetoid.html#Planetoid)and [PlanarSATPairsDataset](https://github.com/ralphabb/GNN-RNI/blob/main/PlanarSATPairsDataset.py). They are altered so they support precomputed Node Centrality Features. The organ data is from [MedMNIST](https://medmnist.com/).
 
 Below is an overview of the graph classification datasets used in benchmarking.
 | Dataset      | MUTAG                  | PROTEINS               | EXP                    | CEXP                   |
@@ -113,3 +113,10 @@ The dataset parser is also slightly different, as it supports graph classificati
 - `--dataset` (str): Name of the dataset to use. Default is `'MUTAG'`.
   - Options include: `'MUTAG'`, `'PROTENS'`, `'EXP'`, `'CEXP'`.
 
+### Example
+
+The example below would train a 2-layer deep CAMoE-GCN on the PROTEINS dataset with a learning rate of 0.005, a batch size ff 32.
+
+```
+python main_graph_classification.py --dataset PROTEINS --lr 0.005 --gnn_layer GCN  --batch_size 32 --depth 2
+```

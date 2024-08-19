@@ -1,7 +1,6 @@
 # CAMoE: Centrality-Aware Mixture of Expers for Better Representation Learning in GNNs
 This repository contains the implementation of the Centrality-Aware Mixture of Experts (CAMoE) framework, which integrates centrality measures into the Node Update process of Graph Neural Networks (GNNs) to enhance  adaptability and performance. Unlike traditional GNNs that apply uniform updates to all nodes, CAMoE utilizes toplogy-based gating and a Mixture of Experts (MoE) approach to enable adaptive Node Updates informed by node centrality.
 
-
 CAMoE can be applied to any message passing GNN, and this implementation supports the Graph Convolutional Network (GCN)and the Graph Attention Network (GAT). The figure below illustrates the discrepancies between a standard GCN and a CAMoE-GCN.
 
 ![architecture](figures/architecture.png)
@@ -15,6 +14,8 @@ All the dependencies are listed in requirements.txt and can be installed by runn
 ```
 pip install -r requirements.txt
 ```
+
+The python version used is 3.10.12 and the experiments are run on a NVIDIA Tesla T4 GPU with 16GB of RAM.
 
 # Repository content
 

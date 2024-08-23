@@ -44,9 +44,8 @@ Below is an overview of the node classification datasets used in benchmarking.
 | # features   | 784                    | 784                    | 3703                   | 1433                   | 500                    |
 | Avg # nodes  | 25221                  | 23660                  | 3327                   | 2708                   | 19717                  |
 
-# Running the models
+# Running the CAMoE
 There are two main files for running the CAMoE-GNN.  ```main_graph_classification.py``` is used for training the model on any of the 4 graph classification datasets, and ```main_node_classification.py``` is run for training the model on any of the 5 node classification datasets.
-
 
 
 ## Running the CAMoE GNN for node classification
@@ -116,8 +115,82 @@ The dataset parser is also slightly different, as it supports graph classificati
 
 ### Example
 
-The example below would train a 2-layer deep CAMoE-GCN on the PROTEINS dataset with a learning rate of 0.005, a batch size ff 32.
+The example below would train a 2-layer deep CAMoE-GCN on the PROTEINS dataset with a learning rate of 0.005, a batch size of 32.
 
 ```
 python main_graph_classification.py --dataset PROTEINS --lr 0.005 --gnn_layer GCN  --batch_size 32 --depth 2
+```
+
+
+# Running the Benchmark models
+There are two main files for running the benchmark models, GCN and GAT.  ```benchmark_graph_classification.py``` is used for training the models on any of the 4 graph classification datasets, and ```benchmark_node_classification.py``` is run for training the models on any of the 5 node classification datasets.
+
+
+## Running the Benchmark GNNs for node classification
+
+To run the scripts from the terminal, navigate to the directory containing the script and use the following command:
+
+```
+python benchmark_node_classification.py 
+```
+
+The script can also parse any of the following arguments
+
+- `--dataset` (str): Name of the dataset to use. Default is `'CiteSeer'`.
+  - Options include: `'CiteSeer'`, `'Cora'`, `'PubMed'`, `'Organ_C'`, `'Organ_S'`.
+
+- `--lr` (float): Learning rate for the optimizer. Default is `0.005`.
+
+- `--batch_size` (int): Batch size for training. Default is `32`.
+
+- `--gnn_model` (str): Type of GNN model to train. Default is `'GCN'`.
+
+- `--max_epochs` (int): Maximum number of training epochs. Default is `1000`.
+
+- `--patience` (int): Number of epochs with no improvement after which training will be stopped early. Default is `100`.
+
+- `--num_folds` (int): Number of folds for cross-validation. Default is `5`.
+
+- `--split_idx` (int): Index of the data split to use. Default is `0`.
+
+- `--hidden_dim` (int): Number of hidden dimensions in the GNN. Default is `32`.
+
+- `--depth` (int): Depth of the GNN (number of layers). Default is `3`.
+
+- `--heads` (int): Number of attention heads (relevant for certain GNN models like GAT). Default is `1`.
+
+- `--GPU` (bool): Whether to use GPU for training. Default is `True`.
+
+- `--forward_on_top_features` (bool): Whether to forward only on top features. Default is `False`.
+
+### Example
+
+The example below would train a 4-layer deep GAT on the CiteSeer dataset with a learning rate of 0.0005, a hidden dimensionality of 64 and and with thwo attention heads per GAT layer.
+
+```
+python benchmark_node_classification.py --dataset CiteSeer --lr 0.0005 --gnn_model GAT  --hidden_dim 64 --depth 4 --heads 2
+```
+
+## Running the Benchmark GNNs for graph classification
+
+Similarily to graph classification, run the following command in the terminal.
+```
+python benchmark_graph_classification.py 
+```
+
+The script can also parse the same arguments as above with the addition of:
+
+- `--batch_size` (int): Batch size for training. Default is `32`.
+
+The dataset parser is also slightly different, as it supports graph classification datasets.
+
+- `--dataset` (str): Name of the dataset to use. Default is `'MUTAG'`.
+  - Options include: `'MUTAG'`, `'PROTENS'`, `'EXP'`, `'CEXP'`.
+
+### Example
+
+The example below would train a 2-layer deep GCN on the PROTEINS dataset with a learning rate of 0.005, a batch size of 32.
+
+```
+python main_graph_classification.py --dataset PROTEINS --lr 0.005 --gnn_model GCN  --batch_size 32 --depth 2
 ```
